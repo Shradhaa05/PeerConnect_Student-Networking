@@ -1,0 +1,603 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>PeerConnect - Student Networking</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Poppins:wght@300;500;700&display=swap');
+
+  :root {
+    --primary-gradient: linear-gradient(135deg, #6a11cb 0%, #2575fc 100%);
+    --primary-color: #2575fc;
+    --secondary-color: #6a11cb;
+    --background-color: #f0f4ff;
+    --card-bg: #fff;
+    --shadow-light: rgba(0, 0, 0, 0.1);
+    --shadow-heavy: rgba(0, 0, 0, 0.15);
+    --text-dark: #222;
+    --text-light: #555;
+    --toast-bg: #2575fc;
+  }
+
+  * {
+    box-sizing: border-box;
+  }
+
+  body {
+    font-family: 'Poppins', sans-serif;
+    margin: 0;
+    background: var(--background-color);
+    color: var(--text-dark);
+    display: flex;
+    flex-direction: column;
+    min-height: 100vh;
+  }
+
+  header {
+    background: var(--primary-gradient);
+    padding: 1rem 2rem;
+    color: white;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+  }
+  header h1 {
+    font-weight: 700;
+    font-size: 1.8rem;
+    letter-spacing: 2px;
+    margin: 0;
+    user-select: none;
+  }
+  nav ul {
+    list-style: none;
+    display: flex;
+    gap: 1.5rem;
+    margin: 0;
+    padding: 0;
+  }
+  
+  nav a {
+    text-decoration: none;
+    color: white;
+    font-weight: 500;
+    font-size: 1rem;
+    position: relative;
+    padding: 0.3rem 0.6rem;
+    border-radius: 8px;
+    transition: background-color 0.3s ease;
+  }
+  nav a:hover,
+  nav a.active {
+    background: rgba(255 255 255 / 0.25);
+  }
+
+  main {
+    flex-grow: 1;
+    max-width: 900px;
+    margin: 2rem auto;
+    padding: 0 1rem 3rem;
+  }
+
+  .content-section {
+    display: none;
+    animation: fadeIn 0.6s ease forwards;
+  }
+  .content-section.active {
+    display: block;
+  }
+
+  /* Form styling */
+  form {
+    background: var(--card-bg);
+    padding: 1.8rem 1.5rem;
+    border-radius: 15px;
+    box-shadow: 0 4px 15px var(--shadow-heavy);
+    max-width: 450px;
+    margin: 0 auto 2rem;
+  }
+  form input[type="text"],
+  form input[type="url"] {
+    width: 100%;
+    padding: 12px 15px;
+    margin-bottom: 1.3rem;
+    border-radius: 10px;
+    border: 1.8px solid #d9dbde;
+    font-size: 1rem;
+    transition: border-color 0.3s ease;
+    font-weight: 500;
+    color: var(--text-dark);
+  }
+  form input[type="text"]:focus,
+  form input[type="url"]:focus {
+    outline: none;
+    border-color: var(--primary-color);
+    box-shadow: 0 0 8px var(--primary-color);
+  }
+  form button {
+    width: 100%;
+    background: var(--primary-gradient);
+    border: none;
+    padding: 14px 0;
+    border-radius: 12px;
+    color: white;
+    font-size: 1.15rem;
+    font-weight: 700;
+    cursor: pointer;
+    transition: box-shadow 0.3s ease;
+    letter-spacing: 0.7px;
+  }
+  form button:hover {
+    box-shadow: 0 6px 20px var(--primary-gradient);
+  }
+
+  /* Profile summary */
+  #profile-summary {
+    max-width: 450px;
+    margin: 0 auto;
+    background: var(--card-bg);
+    border-radius: 15px;
+    box-shadow: 0 4px 15px var(--shadow-heavy);
+    padding: 1.6rem 1.2rem;
+    color: var(--text-dark);
+  }
+  #profile-summary img {
+    width: 110px;
+    height: 110px;
+    border-radius: 50%;
+    object-fit: cover;
+    margin-bottom: 0.8rem;
+    border: 3px solid var(--primary-color);
+  }
+  #profile-summary h3 {
+    margin-top: 0;
+    font-weight: 700;
+    font-size: 1.4rem;
+  }
+  #profile-summary p {
+    font-weight: 500;
+    font-size: 1rem;
+    margin: 4px 0;
+    color: var(--text-light);
+  }
+  
+  /* Students browse and connections grid */
+  #student-list, #connections-list {
+    display: grid;
+    grid-template-columns: repeat(auto-fill,minmax(240px,1fr));
+    gap: 1.5rem;
+  }
+
+  .card {
+    background: var(--card-bg);
+    border-radius: 15px;
+    box-shadow: 0 4px 20px var(--shadow-light);
+    padding: 1.4rem 1rem 1.8rem;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    text-align: center;
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+    cursor: default;
+  }
+  .card:hover {
+    transform: translateY(-6px);
+    box-shadow: 0 8px 30px var(--shadow-heavy);
+  }
+  .card img {
+    width: 90px;
+    height: 90px;
+    border-radius: 50%;
+    border: 3px solid var(--secondary-color);
+    object-fit: cover;
+    margin-bottom: 1rem;
+  }
+  .card h3 {
+    margin: 0.3rem 0 0.6rem;
+    font-weight: 700;
+    font-size: 1.2rem;
+    color: var(--secondary-color);
+  }
+  .card p {
+    margin: 0.2rem 0;
+    font-size: 0.9rem;
+    color: var(--text-light);
+    font-weight: 500;
+    user-select: none;
+  }
+  .card .interests {
+    margin-top: 0.7rem;
+    font-style: italic;
+    font-size: 0.85rem;
+    color: #666;
+  }
+  .card button {
+    margin-top: 1rem;
+    padding: 8px 18px;
+    border-radius: 30px;
+    border: none;
+    font-weight: 700;
+    font-size: 1rem;
+    cursor: pointer;
+    width: 90%;
+    color: white;
+    background: var(--secondary-color);
+    box-shadow: 0 4px 12px var(--secondary-color);
+    transition: background-color 0.3s ease, box-shadow 0.3s ease;
+  }
+  .card button:hover {
+    background: var(--primary-color);
+    box-shadow: 0 6px 15px var(--primary-color);
+  }
+
+  /* Search input */
+  #search {
+    width: 70%;
+    padding: 12px 16px;
+    border-radius: 12px;
+    border: 2px solid var(--secondary-color);
+    margin: 0 auto 25px;
+    display: block;
+    font-weight: 500;
+    font-size: 1rem;
+    transition: border-color 0.3s ease;
+  }
+  #search:focus {
+    outline: none;
+    border-color: var(--primary-color);
+    box-shadow: 0 0 10px var(--primary-color);
+  }
+
+  /* Footer */
+  footer {
+    text-align: center;
+    padding: 1.3rem 1rem;
+    background: var(--primary-gradient);
+    font-weight: 600;
+    font-size: 0.95rem;
+    color: #eef2ffdd;
+    margin-top: auto;
+    user-select: none;
+  }
+
+  /* Toast notifications */
+  #toast {
+    position: fixed;
+    bottom: 2rem;
+    right: 2rem;
+    background: var(--toast-bg);
+    color: white;
+    padding: 16px 22px;
+    border-radius: 12px;
+    box-shadow: 0 4px 20px rgba(37, 117, 252, 0.7);
+    font-weight: 600;
+    font-size: 1rem;
+    opacity: 0;
+    pointer-events: none;
+    transform: translateY(50px);
+    transition: opacity 0.4s ease, transform 0.4s ease;
+    z-index: 100;
+  }
+  #toast.show {
+    opacity: 1;
+    pointer-events: auto;
+    transform: translateY(0);
+  }
+  
+  /* Animations */
+  @keyframes fadeIn {
+    from {opacity: 0; transform: translateY(15px);}
+    to {opacity: 1; transform: translateY(0);}
+  }
+
+  /* Responsive tweaks */
+  @media (max-width: 600px) {
+    nav ul {
+      gap: 0.9rem;
+    }
+    form, #profile-summary {
+      width: 100%;
+    }
+    #search {
+      width: 100%;
+    }
+  }
+</style>
+</head>
+<body>
+<header>
+  <h1>PeerConnect</h1>
+  <nav>
+    <ul>
+      <li><a href="#my-profile" class="active" data-tab="my-profile">My Profile</a></li>
+      <li><a href="#browse-students" data-tab="browse-students">Browse Students</a></li>
+      <li><a href="#my-connections" data-tab="my-connections">My Connections</a></li>
+    </ul>
+  </nav>
+</header>
+
+<main>
+  <section id="my-profile" class="content-section active" tabindex="0" aria-label="My Profile Section">
+    <h2>Create Your Profile</h2>
+    <form id="profile-form" aria-describedby="profile-form-desc" novalidate>
+      <p id="profile-form-desc" class="sr-only">
+        Fill in form fields to create your student profile.
+      </p>
+      <input type="text" id="name" placeholder="Name" aria-label="Name" required />
+      <input type="text" id="college-id" placeholder="College ID" aria-label="College ID" required />
+      <input type="text" id="year" placeholder="Year" aria-label="Year" required />
+      <input type="text" id="department" placeholder="Department" aria-label="Department" required />
+      <input type="url" id="profile-picture" placeholder="Profile Picture URL" aria-label="Profile Picture URL (image link)" required />
+      <input type="text" id="skills" placeholder="Skills/Interests (comma separated)" aria-label="Skills or Interests" required />
+      <input type="text" id="projects" placeholder="Project Areas (comma separated)" aria-label="Project Areas" required />
+      <button type="submit" aria-live="polite" aria-atomic="true">Create Profile</button>
+    </form>
+    <div id="profile-summary" aria-live="polite" aria-atomic="true" tabindex="0"></div>
+  </section>
+
+  <section id="browse-students" class="content-section" tabindex="0" aria-label="Browse Students Section">
+    <h2>Browse Students</h2>
+    <input type="text" id="search" aria-label="Search students by interest or department" placeholder="Search by interest or department" />
+    <div id="student-list" role="list" aria-live="polite" aria-atomic="true"></div>
+  </section>
+
+  <section id="my-connections" class="content-section" tabindex="0" aria-label="My Connections Section">
+    <h2>My Connections</h2>
+    <div id="connections-list" role="list" aria-live="polite" aria-atomic="true"></div>
+  </section>
+</main>
+
+<footer>
+  <p>© 2023 PeerConnect. All rights reserved.</p>
+</footer>
+
+<div id="toast" role="alert" aria-live="assertive" aria-atomic="true"></div>
+
+<script>
+  (() => {
+    const navLinks = document.querySelectorAll('nav a[data-tab]');
+    const sections = document.querySelectorAll('.content-section');
+    const toast = document.getElementById('toast');
+
+    function showToast(message) {
+      toast.textContent = message;
+      toast.classList.add('show');
+      setTimeout(() => toast.classList.remove('show'), 3200);
+    }
+
+    navLinks.forEach(link => {
+      link.addEventListener('click', (e) => {
+        e.preventDefault();
+        const targetId = link.dataset.tab;
+
+        navLinks.forEach(nav => nav.classList.remove('active'));
+        link.classList.add('active');
+
+        sections.forEach(section => {
+          if (section.id === targetId) {
+            section.classList.add('active');
+            section.focus();
+          } else {
+            section.classList.remove('active');
+          }
+        });
+      });
+    });
+
+    const profileForm = document.getElementById('profile-form');
+    const profileSummary = document.getElementById('profile-summary');
+    const studentList = document.getElementById('student-list');
+    const connectionsList = document.getElementById('connections-list');
+    const searchInput = document.getElementById('search');
+
+    // Mock student data including profile pics, skills, projects
+    const mockStudents = [
+      {
+        name: "Alice Johnson",
+        year: "2",
+        department: "Computer Science",
+        interests: "AI, Web Development, Python",
+        projects: "Smart Assistant, Chatbot",
+        picture: "Alice.jpg",
+        collegeId: "CS20221021"
+      },
+      {
+        name: "Bob Smith",
+        year: "3",
+        department: "Mathematics",
+        interests: "Data Science, Statistics, R Programming",
+        projects: "Data Visualizer, Prediction Model",
+        picture: "Bob.jpg",
+        collegeId: "MATH20211015"
+      },
+      {
+        name: "Charlie Lee",
+        year: "1",
+        department: "Chemistry",
+        interests: "Biochemistry, Environmental chemistry",
+        projects: "Paper chromatography, Molecules",
+        picture: "Charlie.jpg",
+        collegeId: "CHEM2024591"
+      },
+      {
+        name: "Rubina Sharma",
+        year: "1",
+        department: "CSIT",
+        interests: "Software Development, Cybersecurity",
+        projects: "Library Management System, Online Examination System",
+        picture: "Rubina.jpg",
+        collegeId: "CSIT20211006"
+      },
+    {
+        name: "Lumraina Mohanty",
+        year: "3",
+        department: "ECE",
+        interests: "Robotics Engineer, Electronics Engineer",
+        projects: "Home automation system, Digital Car Turning and Braking Indicator",
+        picture: "Lumraina.jpg",
+        collegeId: "ECE20231286"
+    },
+    {
+        name: "Goldy Dubey",
+        year: "4",
+        department: "Civil",
+        interests: "Civil Engineering, Design Engineer",
+        projects: "Green buildings, Construction",
+        picture: "Goldy.jpg",
+        collegeId: "CIVIL20243382"
+    },
+    {
+        name: "Juel Dubey",
+        year: "4",
+        department: "Physics",
+        interests: "Quantum Mechanics, Astrophysics",
+        projects: "Photon Simulator, Space Analyzer",
+        picture: "Juel.jpg",
+        collegeId: "PHY20231201"
+      },
+      {
+        name: "Shreel lee",
+        year: "2",
+        department: "Biology",
+        interests: "Microbiology, Biotechnology",
+        projects: "Climate change, DNA fingerprinting",
+        picture: "Shreel.jpg",
+        collegeId: "BIO20033251"
+      },
+      
+    ];
+
+    // Stored connections: array of collegeIds
+    let connections = JSON.parse(localStorage.getItem('pc_connections')) || [];
+
+    // Display profile summary after form submission
+    profileForm.addEventListener('submit', e => {
+      e.preventDefault();
+
+      const name = profileForm.name.value.trim();
+      const collegeId = profileForm['college-id'].value.trim();
+      const year = profileForm.year.value.trim();
+      const department = profileForm.department.value.trim();
+      const profilePicture = profileForm['profile-picture'].value.trim();
+      const skills = profileForm.skills.value.trim();
+      const projects = profileForm.projects.value.trim();
+
+      if (!name || !collegeId || !year || !department || !profilePicture || !skills || !projects) {
+        showToast("Please fill all fields!");
+        return;
+      }
+
+      // Display profile summary nicely
+      profileSummary.innerHTML = `
+        <img src="${profilePicture}" alt="${name} profile picture" />
+        <h3>${name}</h3>
+        <p><strong>College ID:</strong> ${collegeId}</p>
+        <p><strong>Year:</strong> ${year}</p>
+        <p><strong>Department:</strong> ${department}</p>
+        <p><strong>Skills/Interests:</strong> ${skills}</p>
+        <p><strong>Project Areas:</strong> ${projects}</p>
+      `;
+
+      // Optionally, we can store the profile in localStorage here for persistence
+      localStorage.setItem('pc_myprofile', JSON.stringify({name, collegeId, year, department, profilePicture, skills, projects}));
+
+      showToast("Profile created successfully!");
+      profileForm.reset();
+    });
+
+    // Display students cards
+    function displayStudents(studentsArray) {
+      studentList.innerHTML = '';
+      if (studentsArray.length === 0) {
+        studentList.innerHTML = '<p style="grid-column:1/-1; text-align:center; color:#666;">No students match your search.</p>';
+        return;
+      }
+
+      studentsArray.forEach(student => {
+        const isConnected = connections.includes(student.collegeId);
+        const btnText = isConnected ? "Connected" : "Connect";
+        const btnDisabled = isConnected ? "disabled" : "";
+
+        const card = document.createElement('article');
+        card.className = 'card';
+        card.setAttribute('role', 'listitem');
+        card.innerHTML = `
+          <img src="${student.picture}" alt="Profile picture of ${student.name}" loading="lazy" />
+          <h3>${student.name}</h3>
+          <p><strong>Year:</strong> ${student.year}</p>
+          <p><strong>Department:</strong> ${student.department}</p>
+          <p class="interests"><strong>Interests:</strong> ${student.interests}</p>
+          <p class="interests"><strong>Projects:</strong> ${student.projects}</p>
+          <button ${btnDisabled} aria-label="${btnText} with ${student.name}" onclick="connectStudent('${student.collegeId}')">${btnText}</button>
+        `;
+        studentList.appendChild(card);
+      });
+    }
+
+    // Connect with student
+    window.connectStudent = (collegeId) => {
+      if (connections.includes(collegeId)) return; // Prevent repeats
+      const student = mockStudents.find(s => s.collegeId === collegeId);
+      if (!student) return;
+
+      connections.push(collegeId);
+      localStorage.setItem('pc_connections', JSON.stringify(connections));
+      displayConnections();
+
+      showToast(`Connection request sent to ${student.name} ✓ (auto accepted)`);
+      // Refresh student list to update buttons
+      filterStudents(searchInput.value.trim());
+    };
+
+    // Display connections with detailed info
+    function displayConnections() {
+      connectionsList.innerHTML = '';
+      if (connections.length === 0) {
+        connectionsList.innerHTML = '<p style="color:#666;">No connections yet. Browse students and connect!</p>';
+        return;
+      }
+
+      connections.forEach(collegeId => {
+        const student = mockStudents.find(s => s.collegeId === collegeId);
+        if (!student) return;
+
+        const card = document.createElement('article');
+        card.className = 'card';
+        card.setAttribute('role', 'listitem');
+        card.innerHTML = `
+          <img src="${student.picture}" alt="Profile picture of ${student.name}" loading="lazy" />
+          <h3>${student.name}</h3>
+          <p><strong>Year:</strong> ${student.year}</p>
+          <p><strong>Department:</strong> ${student.department}</p>
+          <p class="interests"><strong>Interests:</strong> ${student.interests}</p>
+          <p class="interests"><strong>Projects:</strong> ${student.projects}</p>
+        `;
+        connectionsList.appendChild(card);
+      });
+    }
+
+    // Filter students by search
+    function filterStudents(searchTerm) {
+      const lowerTerm = searchTerm.toLowerCase();
+      const filtered = mockStudents.filter(s => 
+        s.interests.toLowerCase().includes(lowerTerm) || 
+        s.department.toLowerCase().includes(lowerTerm) || 
+        s.name.toLowerCase().includes(lowerTerm) ||
+        s.projects.toLowerCase().includes(lowerTerm)
+      );
+      displayStudents(filtered);
+    }
+
+    searchInput.addEventListener('input', () => {
+      filterStudents(searchInput.value.trim());
+    });
+
+    // On page load, display all students and existing connections
+    displayStudents(mockStudents);
+    displayConnections();
+
+  })();
+</script>
+
+</body>
+</html>
